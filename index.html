@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hernando - VR & Game Developer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated background shapes */
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        .cube {
+            width: 40px;
+            height: 40px;
+            background: #4a90e2;
+            transform: rotate(45deg);
+        }
+
+        .sphere {
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 35px solid #4a90e2;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #4a90e2;
+        }
+
+        /* Page sections */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 100px 2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Hero section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #4a90e2, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: #4a90e2;
+            margin-bottom: 2rem;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            color: #cccccc;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #4a90e2, #0066cc);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.4);
+        }
+
+        /* Section styling */
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #4a90e2;
+        }
+
+        .content-grid {
+            display: grid;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.2);
+            border-color: rgba(74, 144, 226, 0.4);
+        }
+
+        .card h3 {
+            color: #4a90e2;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .card .date {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card .company {
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        /* Skills grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .skill-item {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .skill-item:hover {
+            background: rgba(74, 144, 226, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Contact form */
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Personal interests */
+        .interests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .interest-category {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .interest-category h4 {
+            color: #4a90e2;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .page {
+                padding: 80px 1rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background shapes -->
+    <div class="bg-shapes" id="bgShapes"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Hernando.dev</a>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('home')" class="active">Home</a></li>
+                <li><a href="#" onclick="showPage('about')">About</a></li>
+                <li><a href="#" onclick="showPage('experience')">Experience</a></li>
+                <li><a href="#" onclick="showPage('education')">Education</a></li>
+                <li><a href="#" onclick="showPage('contact')">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <div class="hero">
+            <h1>Hernando Nieto</h1>
+            <p class="subtitle">Unity Developer | Systems Engineer | VR Specialist</p>
+            <p class="hero-description">
+                Unity developer with 2+ years of specialized experience in 2D/3D games, multiplayer systems, and VR applications. 
+                Systems Engineer and Financial Administrator passionate about creating immersive experiences using Unity, 
+                OpenXR, Photon, and cutting-edge VR technologies. From teaching VR development to building production-ready applications.
+            </p>
+            <a href="#" onclick="showPage('contact')" class="cta-button">Let's Create Something Amazing</a>
+        </div>
+
+        <div class="content-grid">
+            <div class="card">
+                <h3>🎮 Unity Development</h3>
+                <p>Expert in Unity 2D/3D game development with extensive experience in URP, Input System, UI design, Cinemachine, Animator, and Addressables System. Proficient in C#, GitHub, and Jira workflows.</p>
+            </div>
+            <div class="card">
+                <h3>🥽 VR Applications</h3>
+                <p>Specialized in VR development using XRIT, OpenXR, and Oculus SDK. Created apartment showcase applications with teleportation, VR interactions, locomotion systems, and multiplayer capabilities.</p>
+            </div>
+            <div class="card">
+                <h3>🌐 Multiplayer Systems</h3>
+                <p>Advanced knowledge in Unity Netcode, Photon, Unity Relay, and Cloud Diagnostics. Experience building multiplayer demos with authentication, session management, and network synchronization.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Page -->
+    <div id="about" class="page">
+        <h2 class="section-title">About Me</h2>
+        <div class="content-grid">
+            <div class="card">
+                <h3>Who I Am</h3>
+                <p>I'm a passionate Unity developer and Systems Engineer from Villamaría, Caldas, Colombia, who thrives on challenges and loves pushing the boundaries of interactive technology. My competitive spirit drives me to continuously improve and deliver exceptional results, while my team-oriented approach ensures successful collaboration on complex projects.</p>
+                <p>With expertise spanning from financial administration to cutting-edge VR development, I bring a unique perspective that combines business acumen with technical excellence. I'm always focused on achieving company goals while maintaining creativity and innovation in every project.</p>
+            </div>
+        </div>
+
+        <div class="interests-grid">
+            <div class="interest-category">
+                <h4>🏃‍♂️ Sports & Activities</h4>
+                <p>Football (soccer) enthusiast, Formula 1 fan, and active in table tennis, basketball, and football. I love the strategy, teamwork, and competitive spirit that sports bring to life.</p>
+            </div>
+            <div class="interest-category">
+                <h4>🌍 Travel & Culture</h4>
+                <p>Passionate about exploring new cultures and meeting people from around the world. Dream destinations include Spain, Switzerland, France, Sweden, Norway, England, Russia, China, and Australia.</p>
+            </div>
+            <div class="interest-category">
+                <h4>🏔️ Colombian Adventures</h4>
+                <p>Explored beautiful Colombian destinations including Cartagena, Barranquilla, Santa Marta, Valledupar, Isla Margarita, El Nevado del Ruiz, Armenia, and Parque del Café.</p>
+            </div>
+            <div class="interest-category">
+                <h4>💡 Philosophy</h4>
+                <p>I believe in embracing challenges as opportunities for growth, working collaboratively toward shared goals, and bringing creativity and technical excellence to every project.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Experience Page -->
+    <div id="experience" class="page">
+        <h2 class="section-title">Professional Experience</h2>
+        <div class="content-grid">
+            <div class="card">
+                <div class="date">July 2024 - Present</div>
+                <h3>VR & Multiplayer Applications Teacher</h3>
+                <div class="company">Paradox - Instituto Tecnológico de Imagen y Sonido, Guayaquil, Ecuador</div>
+                <p>Teaching VR application development using Unity and OpenXR, including XR Interaction Toolkit implementation, Input System, locomotion, and World Space UI. Instructing multiplayer game development with Unity Netcode, movement synchronization, Network Manager, and RPCs. Creating demos for testing and optimizing builds for Meta Quest 2 devices.</p>
+            </div>
+            <div class="card">
+                <div class="date">January 2024 - June 2024</div>
+                <h3>Systems Engineering Professor</h3>
+                <div class="company">Corporación Universitaria Remington, Manizales, Colombia</div>
+                <p>Teaching various systems engineering subjects using constructivist pedagogical methods. Planning and delivering lectures, creating educational materials, designing evaluations, and providing constructive feedback. Focused on developing professional skills through practical projects and autonomous learning approaches.</p>
+            </div>
+            <div class="card">
+                <div class="date">October 2021 - March 2024</div>
+                <h3>Unity VR Developer</h3>
+                <div class="company">PortalSense, Manizales, Colombia</div>
+                <p>Developed VR applications for apartment showcasing featuring teleportation, VR interactions, and locomotion systems. Configured URP and multiplayer functionality, implemented rendering optimizations to achieve 60-72 fps, resolved VRC issues using Unity Profiler and OVR metrics tools. Successfully migrated project from Built-in RP to URP and implemented global multiplayer using Photon. Application published to Oculus App Lab.</p>
+            </div>
+            <div class="card">
+                <div class="date">September 2022 - June 2023</div>
+                <h3>Unity Multiplayer Developer</h3>
+                <div class="company">Life Is The Game, Bucaramanga, Colombia</div>
+                <p>Researched multiplayer frameworks, configured Netcode with anonymous Unity authentication, set up Relay and Cloud Diagnostics. Developed UI using Unity with MVVM model, WPF, XAML, and Noesis. Created basic multiplayer demo with connection, authentication, game sessions, and match start/leave functionality for golf game.</p>
+            </div>
+            <div class="card">
+                <div class="date">February 2022 - July 2022</div>
+                <h3>Content Creator</h3>
+                <div class="company">XR Bootcamp</div>
+                <p>Created approximately 200 educational articles for the XR Bootcamp course, contributing to comprehensive learning resources for VR and AR development.</p>
+            </div>
+            <div class="card">
+                <div class="date">March 2021 - September 2021</div>
+                <h3>Unity 3D Development Apprentice</h3>
+                <div class="company">GameDevHQ, Hawaii, United States</div>
+                <p>Developed various systems, mechanics, inputs, and animations for 2D, 2.5D, 3D, mobile, and AR applications. Implemented shooting, spawning, damage, enemy, movement, AI, and Cinemachine camera systems. Advanced C# programming including classes, abstract classes, interfaces, static types, enumerations, dictionaries, events, and design patterns like Observer pattern and Scriptable Objects.</p>
+            </div>
+        </div>
+
+        <h3 style="color: #4a90e2; margin: 3rem 0 2rem;">Core Technologies & Skills</h3>
+        <div class="skills-grid">
+            <div class="skill-item"><strong>Unity 3D/2D</strong></div>
+            <div class="skill-item"><strong>C# Programming</strong></div>
+            <div class="skill-item"><strong>VR Development (XRIT)</strong></div>
+            <div class="skill-item"><strong>OpenXR & Oculus SDK</strong></div>
+            <div class="skill-item"><strong>Unity Netcode</strong></div>
+            <div class="skill-item"><strong>Photon Multiplayer</strong></div>
+            <div class="skill-item"><strong>Unity Relay</strong></div>
+            <div class="skill-item"><strong>URP (Universal Render Pipeline)</strong></div>
+            <div class="skill-item"><strong>Input System</strong></div>
+            <div class="skill-item"><strong>Cinemachine</strong></div>
+            <div class="skill-item"><strong>Addressables System</strong></div>
+            <div class="skill-item"><strong>Localization</strong></div>
+            <div class="skill-item"><strong>WPF & MVVM</strong></div>
+            <div class="skill-item"><strong>API Integration</strong></div>
+            <div class="skill-item"><strong>GitHub & Jira</strong></div>
+            <div class="skill-item"><strong>Unity Profiler</strong></div>
+            <div class="skill-item"><strong>Performance Optimization</strong></div>
+            <div class="skill-item"><strong>Cloud Diagnostics</strong></div>
+        </div>
+    </div>
+
+    <!-- Education Page -->
+    <div id="education" class="page">
+        <h2 class="section-title">Education & Learning</h2>
+        <div class="content-grid">
+            <div class="card">
+                <div class="date">2016 - October 2021</div>
+                <h3>Systems Engineering</h3>
+                <div class="company">Corporación Universitaria Remington</div>
+                <p>Professional degree in Systems Engineering with comprehensive foundation in software development, computer science principles, and system architecture. Specialized in programming fundamentals and technology solutions.</p>
+            </div>
+            <div class="card">
+                <div class="date">2009 - 2012</div>
+                <h3>Financial Administration</h3>
+                <div class="company">Corporación Universitaria Minuto de Dios</div>
+                <p>Professional degree in Administration providing strong business foundation, financial management skills, and strategic thinking that complements technical development expertise.</p>
+            </div>
+            <div class="card">
+                <div class="date">March 2021 - August 2021</div>
+                <h3>Unity Game Development Certificate</h3>
+                <div class="company">GameDevHQ</div>
+                <p>Intensive certification program covering Unity development, C# programming, game mechanics, and industry best practices. Hands-on experience with 2D, 3D, mobile, and AR development.</p>
+            </div>
+            <div class="card">
+                <div class="date">2001 - 2002</div>
+                <h3>Construction Technology</h3>
+                <div class="company">SENA</div>
+                <p>Technical certification in construction, providing practical problem-solving skills and attention to detail that enhances software development precision.</p>
+            </div>
+        </div>
+
+        <h3 style="color: #4a90e2; margin: 3rem 0 2rem;">Professional Certifications</h3>
+        <div class="skills-grid">
+            <div class="skill-item"><strong>C# Advanced Programming</strong></div>
+            <div class="skill-item"><strong>Unity Medical Visualization</strong></div>
+            <div class="skill-item"><strong>Unity Animation & Coding</strong></div>
+            <div class="skill-item"><strong>Unity Associate Game Developer</strong></div>
+            <div class="skill-item"><strong>Unity Audio & Effects</strong></div>
+            <div class="skill-item"><strong>Unity Animation & Cinematics</strong></div>
+        </div>
+
+        <h3 style="color: #4a90e2; margin: 3rem 0 2rem;">Academic Honors</h3>
+        <div class="content-grid">
+            <div class="card">
+                <h3>🏆 Academic Excellence</h3>
+                <p><strong>Mejor Bachiller:</strong> Best high school graduate recognition for outstanding academic performance.</p>
+                <p><strong>Mejor Puntaje ICFES:</strong> Highest score achievement in Colombia's national standardized test, demonstrating exceptional academic capabilities.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Page -->
+    <div id="contact" class="page">
+        <h2 class="section-title">Let's Connect</h2>
+        <div class="content-grid">
+            <div class="card">
+                <h3>Ready to Collaborate?</h3>
+                <p>I'm always excited to discuss new projects, innovative ideas, and collaboration opportunities. Whether you're looking to create an immersive VR experience, develop an engaging game, or need technical consultation, I'd love to hear from you.</p>
+                <p>Let's build something extraordinary together that pushes the boundaries of interactive technology and creates memorable user experiences.</p>
+            </div>
+        </div>
+
+        <form class="contact-form">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="company">Company (Optional)</label>
+                <input type="text" id="company" name="company">
+            </div>
+            <div class="form-group">
+                <label for="project">Project Type</label>
+                <select id="project" name="project" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 8px; color: white;">
+                    <option value="vr">VR Development</option>
+                    <option value="game">Game Development</option>
+                    <option value="consultation">Technical Consultation</option>
+                    <option value="collaboration">Collaboration</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="5" placeholder="Tell me about your project idea or how we can work together..." required></textarea>
+            </div>
+            <button type="submit" class="cta-button" style="border: none; cursor: pointer;">Send Message</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: rgba(255, 255, 255, 0.05); border-radius: 15px;">
+            <h3 style="color: #4a90e2; margin-bottom: 1rem;">Get in Touch</h3>
+            <p style="margin-bottom: 1rem;"><strong>📍 Location:</strong> Villamaría, Caldas, Colombia</p>
+            <p style="margin-bottom: 1rem;"><strong>📱 Mobile:</strong> +57 300 342 0492</p>
+            <p style="margin-bottom: 1rem;"><strong>✉️ Email:</strong> hernandonj@gmail.com</p>
+            <p style="margin-bottom: 1rem;"><strong>💼 LinkedIn:</strong> <a href="https://www.linkedin.com/in/hernandonj" target="_blank" style="color: #4a90e2;">linkedin.com/in/hernandonj</a></p>
+            <p><strong>🌍 Available for:</strong> Remote work, international projects, VR/Unity development, and educational collaborations</p>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Create animated background shapes
+        function createShape() {
+            const shapes = ['cube', 'sphere', 'triangle'];
+            const shape = document.createElement('div');
+            shape.className = `shape ${shapes[Math.floor(Math.random() * shapes.length)]}`;
+            shape.style.left = Math.random() * 100 + '%';
+            shape.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            shape.style.animationDelay = Math.random() * 5 + 's';
+            
+            document.getElementById('bgShapes').appendChild(shape);
+            
+            // Remove shape after animation
+            setTimeout(() => {
+                shape.remove();
+            }, 25000);
+        }
+
+        // Create shapes periodically
+        setInterval(createShape, 2000);
+
+        // Create initial shapes
+        for (let i = 0; i < 10; i++) {
+            setTimeout(createShape, i * 500);
+        }
+
+        // Form submission
+        document.querySelector('.contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your message! I\'ll get back to you soon.');
+        });
+
+        // Smooth scrolling and enhanced interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add subtle parallax effect to cards
+            document.addEventListener('mousemove', function(e) {
+                const cards = document.querySelectorAll('.card');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                cards.forEach((card, index) => {
+                    const intensity = (index % 3 + 1) * 2;
+                    card.style.transform = `translate(${x * intensity}px, ${y * intensity}px)`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>        
